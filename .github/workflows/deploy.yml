@@ -31,6 +31,9 @@ jobs:
           CI: false
         run: npm run build
 
+      - name: Copy CNAME
+        run: cp CNAME dist/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
