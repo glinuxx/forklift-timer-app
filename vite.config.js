@@ -5,7 +5,7 @@ import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/forklift-timer-app/',
+  base: '/',
   plugins: [react()],
   css: {
     postcss: {
