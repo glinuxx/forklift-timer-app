@@ -7,19 +7,21 @@ import PrivateRoute from './components/PrivateRoute';
 import './index.css';
 
 function App() {
+  const basename = import.meta.env.DEV ? '/' : '/forklift-timer-app/';
+
   return (
     <AuthProvider>
-      <Router>
+      <Router basename={basename}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <Dashboard />
               </PrivateRoute>
-            } 
+            }
           />
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
