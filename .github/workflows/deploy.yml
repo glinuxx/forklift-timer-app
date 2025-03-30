@@ -6,10 +6,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
   actions: write
+  deployments: write
 
 jobs:
   build:
@@ -30,8 +31,11 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Copy CNAME
-        run: cp CNAME dist/
+      - name: List build output
+        run: ls -la dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
