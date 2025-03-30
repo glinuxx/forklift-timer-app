@@ -7,38 +7,40 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Simple validation
-    if (!email || !password) {
-      setError('Todos os campos são obrigatórios');
-      return;
-    }
+    setLoading(true);
 
     try {
-      // Use API to authenticate user
+      if (!email || !password) {
+        throw new Error('Por favor, preencha todos os campos');
+      }
+
       const response = await Api.post('/auth/login', { email, password });
-      
-      if (response.data && response.data.user) {
-        // Login successful
+
+      if (response.data?.user) {
         login(response.data.user);
         navigate('/dashboard');
       } else {
-        setError('Erro ao fazer login. Tente novamente.');
+        throw new Error('Erro ao fazer login. Tente novamente.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      
-      if (error.response && error.response.status === 401) {
+
+      if (error.response?.status === 401) {
         setError('Email ou senha inválidos');
+      } else if (error.message) {
+        setError(error.message);
       } else {
         setError('Erro ao conectar ao servidor. Tente novamente mais tarde.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +49,9 @@ const Login = () => {
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900">Login</h1>
-          <p className="mt-2 text-sm text-gray-600">Entre para acessar o sistema</p>
+          <p className="mt-2 text-sm text-gray-600">
+            Use: admin@admin.com / admin
+          </p>
         </div>
 
         {error && (
@@ -69,6 +73,7 @@ const Login = () => {
               className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -84,15 +89,17 @@ const Login = () => {
               className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
 
           <div>
             <button
               type="submit"
-              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              disabled={loading}
             >
-              Entrar
+              {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </div>
         </form>

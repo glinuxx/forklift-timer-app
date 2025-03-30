@@ -1,48 +1,71 @@
 // Mock API service
-const mockUsers = [
-    {
-        id: 1,
-        email: 'teste@teste.com',
-        password: '123456',
-        name: 'Usuário Teste'
-    }
-];
+const mockUser = {
+    email: 'admin@admin.com',
+    password: 'admin',
+    name: 'Admin User',
+    id: 1
+};
 
-const api = {
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const Api = {
     post: async (url, data) => {
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await delay(500);
 
         if (url === '/auth/login') {
-            const user = mockUsers.find(u =>
-                u.email === data.email && u.password === data.password
-            );
+            const { email, password } = data;
 
-            if (user) {
-                const { password, ...userWithoutPassword } = user;
-                return { data: { user: userWithoutPassword } };
+            if (email === mockUser.email && password === mockUser.password) {
+                return {
+                    data: {
+                        user: {
+                            id: mockUser.id,
+                            name: mockUser.name,
+                            email: mockUser.email
+                        }
+                    }
+                };
             }
 
-            throw { response: { status: 401 } };
+            // Simulate 401 error for invalid credentials
+            const error = new Error('Invalid credentials');
+            error.response = { status: 401 };
+            throw error;
         }
 
         if (url === '/auth/register') {
-            if (mockUsers.some(u => u.email === data.email)) {
-                throw { response: { status: 400, data: { message: 'Email já cadastrado' } } };
+            const { email, password, name } = data;
+
+            if (email === mockUser.email) {
+                const error = new Error('Email already registered');
+                error.response = { status: 400 };
+                throw error;
             }
 
-            const newUser = {
-                id: mockUsers.length + 1,
-                ...data
+            return {
+                data: {
+                    user: {
+                        id: Date.now(),
+                        name,
+                        email
+                    }
+                }
             };
-            mockUsers.push(newUser);
-
-            const { password, ...userWithoutPassword } = newUser;
-            return { data: { user: userWithoutPassword } };
         }
 
-        throw new Error('URL não encontrada');
+        throw new Error(`Unknown endpoint: ${url}`);
+    },
+
+    get: async (url) => {
+        await delay(500);
+        throw {
+            response: {
+                status: 404,
+                data: { message: 'Endpoint não encontrado' }
+            }
+        };
     }
 };
 
-export default api;
+export default Api;
