@@ -9,8 +9,6 @@ permissions:
   contents: write
   pages: write
   id-token: write
-  actions: write
-  deployments: write
 
 jobs:
   build:
@@ -25,37 +23,13 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Check Node.js version
-        run: node --version
-
-      - name: Check npm version
-        run: npm --version
-
       - name: Install dependencies
-        run: |
-          npm cache clean --force
-          rm -rf node_modules package-lock.json
-          npm install
-
-      - name: List installed packages
-        run: npm list --depth=0
+        run: npm ci
 
       - name: Build project
         env:
           CI: false
-        run: |
-          npm run build
-          if [ ! -d "dist" ]; then
-            echo "dist directory not found!"
-            exit 1
-          fi
-
-      - name: List build output
-        run: |
-          echo "Contents of dist directory:"
-          ls -la dist/
-          echo "Contents of dist/assets directory:"
-          ls -la dist/assets/ || echo "assets directory not found"
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -71,10 +45,10 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
